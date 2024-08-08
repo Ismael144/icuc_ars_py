@@ -1,0 +1,8 @@
+cvzone 
+numpy==1.26.1
+opencv-python 
+face-recognition 
+requests 
+redis
+rembg
+pywin32

@@ -1,0 +1,8 @@
+api:
+  endpoint: http://localhost/icuc_ars/api
+  hash: e915994d0f9fada968084a8f69ba5f00ffcb42b73dc9dfbcfd437ad5ac81a2e0
+attendance_settings:
+  check_in_time: 07:00
+  check_out_time: '18:00'
+storage:
+  donwloaded_images_dir: images
