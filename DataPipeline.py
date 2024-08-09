@@ -38,31 +38,34 @@ class DataPipeline:
                 time.sleep(5)
                 continue
 
-            print("[Connection Ok]")
-            
             # Migrate attendance data 
-            self.attendance_registry_controller.migrate_data_from_sqlite_to_online_db()
+            self.attendance_registry_controller.migrate_data_from_sqlite_to_server_db()
             
             # Compare hashes
             if self.compare_hashes():
-                print("No Changes Detected ...")
                 time.sleep(5)
                 continue
             else: 
-                # Data updated 
+                # Updating cached data 
                 self.update_images_dir()
                 results = self.get_encodings_and_associate_to_api_records()
-                
+                print(f"\n{self.image_downloader.get_downloaded_images_count()} Images Were Successfully Downloaded\n")
                 
                 # Cache the results
                 print("Caching Results...")
                 self.data_cacher.rewrite_database(results)
                 
-                print("From Redis Database: ", self.data_cacher.list_all_entries())          
-    
+                print(f"\n{len(results)} Results Were Cached To Redis...\n")
+                
     
     @staticmethod 
     def request_get(url: str) -> str: 
+        """
+        Makes requests to given API 
+        
+        Returns
+            str 
+        """
         try: 
             request = requests.get(url)
             response_content = request.text
@@ -72,7 +75,7 @@ class DataPipeline:
         return response_content
     
     
-    def fetch_api_staff_data(self) -> dict:     
+    def fetch_api_staff_data(self) -> dict:
         staff_api_data = requests.get(concat_to_base_uri('/staff_data/index'))
         api_response = staff_api_data.json()
         
@@ -117,7 +120,13 @@ class DataPipeline:
         return png_img_path
 
     
-    def get_downloaded_images(self): 
+    def get_downloaded_images(self):
+        """
+            Reads directory with staff images 
+            
+            returns: 
+                list
+        """
         images = os.listdir(self.downloaded_images_dir)
         return images
     
@@ -159,8 +168,10 @@ class DataPipeline:
     def get_encodings_and_associate_to_api_records(self): 
         api_data = self.fetch_api_staff_data()
         api_data = list(filter(lambda item: len(item['images']), api_data))
-        for api_record in api_data: 
+        print(api_data)
+        for api_record in api_data:
             if len(api_record.get('images')) < 1:
+                logger.info(f"{api_record['fullname']} has no images")
                 continue
 
             # Get the images and encode them, after that then return them

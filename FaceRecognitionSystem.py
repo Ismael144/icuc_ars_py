@@ -9,6 +9,10 @@ import face_recognition
 from init import config_parser 
 from DataCacher import DataCacher
 from AttendanceRegistryController import AttendanceRegistryController
+import psutil
+import os
+import time
+import json
 
 class FaceRecognitionSystem: 
     def __init__(self): 
@@ -22,6 +26,9 @@ class FaceRecognitionSystem:
     def get_cache_data(self): 
         encodeListKnown = []
         cache_data = self.redis_cacher_class.list_all_entries()
+
+        # Filtering out data without images
+        cache_data = list(filter(lambda entry: len(entry['images']), cache_data))
         
         if len(cache_data):
             if not len(cache_data[0]['img_encodings']):
@@ -46,7 +53,7 @@ class FaceRecognitionSystem:
             "ids": staffIds,
             "fullNames": fullNames, 
             "data": cache_data,
-            "encodeListKnown": encodeListKnown
+            "encodeListKnown": list(filter(lambda enc: len(enc), encodeListKnown))
         }
         
         return retrieved_cache_data 
@@ -105,6 +112,7 @@ class FaceRecognitionSystem:
             
             if faceCurFrame:
                 for encodeFace, faceLoc in zip(encodeCurFrame, faceCurFrame):
+                    print(self.get_cache_data()['encodeListKnown'], "\n\n\n")
                     matches = face_recognition.compare_faces(self.get_cache_data()['encodeListKnown'], encodeFace)
                     faceDis = face_recognition.face_distance(self.get_cache_data()['encodeListKnown'], encodeFace)
 
@@ -151,6 +159,8 @@ class FaceRecognitionSystem:
                                 for item in self.get_cache_data()['data']:
                                     if item['staff_id'] == recognized_staff_id: 
                                         staffMemberInfo = item
+
+                        print(staffMemberInfo)
 
                         staffImage = cv2.imread(staffMemberInfo['images'][0])
 
@@ -266,5 +276,38 @@ class FaceRecognitionSystem:
 
 face_recognition_app = FaceRecognitionSystem()
 
-if __name__ == '__main__': 
-    face_recognition_app.main()
+# Function to get the memory usage of the current process
+def get_memory_usage():
+    process = psutil.Process(os.getpid())
+    mem_info = process.memory_info()
+    return mem_info.rss / 1024 / 1024  # Convert bytes to MB
+
+# Function to log memory usage to a file
+def log_memory_usage(filename="memory_usage.json", interval=5):
+    memory_data = []  # Initialize an empty list to store memory data
+    try:
+        with open(filename, "a") as log_file:
+            while True:
+                mem_usage = get_memory_usage()
+                entry = {"fr_system": {
+                        "timestamp": time.strftime('%Y-%m-%d %H:%M:%S'),
+                        "memory_usage_mb": round(mem_usage, 2)
+                    }
+                }
+                memory_data.append(entry)  # Add the entry to the list
+                log_file.seek(0)  # Go to the start of the file for overwriting
+                json.dump(memory_data, log_file, indent=4)  # Write JSON data
+                log_file.flush()  # Ensure data is written to disk
+                time.sleep(interval)
+    except KeyboardInterrupt:
+        print("Memory logging stopped.")
+
+if __name__ == "__main__":
+    # Start the memory logging in a separate thread
+    from threading import Thread
+    monitoring_thread = Thread(target=log_memory_usage)
+    monitoring_thread.daemon = True
+    monitoring_thread.start()
+
+    # Run your main script
+    face_recognition_app.main()  # Assuming your_script has a main() function

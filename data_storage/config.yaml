@@ -1,6 +1,6 @@
 api:
   endpoint: http://localhost/icuc_ars/api
-  hash: e915994d0f9fada968084a8f69ba5f00ffcb42b73dc9dfbcfd437ad5ac81a2e0
+  hash: a1ce5de4e28d18d580c21f65326b31e923842a97e273d79333ef80a1e67b3efd
 attendance_settings:
   check_in_time: 07:00
   check_out_time: '18:00'

@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 class ImageDownloader:
     def __init__(self, downloaded_images_dir: str):
         self.downloaded_images_dir = downloaded_images_dir
+        self.downloaded_images_count = 0
 
     def _get_image_name(self, img_url: str):
         # Since the images downloaded are in png format, we change the image extension to png
@@ -30,6 +31,8 @@ class ImageDownloader:
                 image_name = os.path.join(self.downloaded_images_dir, self._get_image_name(img_url))
                 output.save(image_name)
                 print("Image saved successfully!")
+                self.downloaded_images_count += 1
+                
                 return True
             else:
                 logger.error(f"Failed to download image from {img_url}.")
@@ -50,4 +53,10 @@ class ImageDownloader:
                 except Exception as e:
                     print(f"Error processing image: {e}")
                     logger.error(f"Error processing image: {e}")
+                    
+                    
+    def get_downloaded_images_count(self) -> int: 
+        imgs_count = self.downloaded_images_count
+        self.downloaded_images_count = 0 
+        return imgs_count
 

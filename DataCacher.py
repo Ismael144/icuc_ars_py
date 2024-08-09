@@ -79,35 +79,3 @@ class DataCacher:
             print(f"Error decoding array: {e}")
             return None
 
-# Example usage
-if __name__ == "__main__":
-    manager = DataCacher()
-
-    # Create a sample ndarray
-    sample_array = np.array([1.0, 2.0, 3.0])
-
-    # Add an entry
-    manager.save_entry(123, "John Doe", ["image1.png", "image2.png"], [sample_array])
-
-    # Get an entry
-    entry = manager.get_entry(123)
-    print("Entry:", entry)
-
-    # Update an entry
-    new_sample_array = np.array([4.0, 5.0, 6.0])
-    manager.update_entry(123, fullname="John D.", images=["image1_updated.png", "image3.png"], img_encodings=[new_sample_array])
-
-    # List all entries
-    all_entries = manager.list_all_entries()
-    print("All Entries:", all_entries)
-
-    # Rewrite database with new data
-    new_data = [
-        {"staff_id": 124, "fullname": "Jane Smith", "images": ["image4.png"], "img_encodings": [sample_array.tolist()]},
-        {"staff_id": 125, "fullname": "Bob Brown", "images": ["image5.png"], "img_encodings": [new_sample_array.tolist()]}
-    ]
-    manager.rewrite_database(new_data)
-
-    # List all entries after rewrite
-    all_entries = manager.list_all_entries()
-    print("All Entries after rewrite:", all_entries)

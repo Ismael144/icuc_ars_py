@@ -1,7 +1,7 @@
 import logging
 
 class Logger:
-    def __init__(self, filename='logs.log'):
+    def __init__(self, filename='logger/logs.log'):
         self.filename = filename
         self.logger = logging.getLogger('logger')
         self.logger.setLevel(logging.DEBUG)
@@ -24,3 +24,10 @@ class Logger:
 
     def critical(self, message):
         self.logger.critical(message)
+
+    def read(self) -> str: 
+        logger_content = ""
+        with open(self.filename, "r") as log_file: 
+            logger_content = log_file.read()
+ 
+        return logger_content

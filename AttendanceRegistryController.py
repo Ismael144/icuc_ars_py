@@ -3,9 +3,8 @@ import json
 import sqlite3
 import datetime
 import requests
-from pprint import pprint
-from init import config_parser, concat_to_base_uri
 from typing import Union, List, Dict
+from init import config_parser, concat_to_base_uri
 from SSCProtocolController import SSCProtocolController
 
 class AttendanceRegistryController:
@@ -51,7 +50,7 @@ class AttendanceRegistryController:
         return True if len(attendance_record) else False
 
 
-    def migrate_data_from_sqlite_to_online_db(self) -> bool:
+    def migrate_data_from_sqlite_to_server_db(self) -> bool:
         from datetime import datetime
         all_attendances = self.fetch_all_attendances()
 
